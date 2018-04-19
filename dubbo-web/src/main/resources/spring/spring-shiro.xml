@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+		http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.2.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
+
+
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!--设置自定义realm -->
+        <property name="realm" ref="authRealm"/>
+        <property name="cacheManager" ref="cacheManager"/>
+        <property name="sessionManager" ref="sessionManager"/>
+    </bean>
+
+    <bean id="sessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="sessionValidationSchedulerEnabled" value="false"/>
+        <property name="sessionDAO" ref="sessionDao"/>
+        <property name="globalSessionTimeout" value="${auth.session.time}"/>
+    </bean>
+
+    <bean id="sessionDao" class="com.dubbo.web.shiro.RedisSessionDao"/>
+
+    <!-- Realm实现 -->
+    <bean id="authRealm" class="com.dubbo.web.shiro.AuthRealm">
+        <property name="cachingEnabled" value="true"/>
+        <property name="authenticationCachingEnabled" value="true"/>
+        <!-- 权限缓存器别名，这里用redis做缓存，需要用这个区分权限和认证key -->
+        <property name="authenticationCacheName" value="authenticationCache"/>
+        <property name="authorizationCachingEnabled" value="true"/>
+        <!-- 认证缓存器别名，这里用redis做缓存，需要用这个区分权限和认证key -->
+        <property name="authorizationCacheName" value="authorizationCache"/>
+    </bean>
+
+    <!-- 缓存管理器 使用redis实现 -->
+    <bean id="cacheManager" class="com.dubbo.web.shiro.RedisCacheManager">
+        <property name="jedisCluster" ref="jedisCluster"/>
+    </bean>
+
+    <!-- shiro /** = authc,myperm -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="filters">
+            <map>
+                <entry key="myperm" value-ref="permissionFileter"/>
+                <entry key="myauthc" value-ref="sessionFileter"/>
+            </map>
+        </property>
+        <property name="filterChainDefinitions">
+            <value>
+                /auth/login.do = anon
+                /auth/loginOut.do = anon
+                /auth/authCode.do = anon
+                /auth/resource/getResourceTree.do = myauthc
+                /auth/getOwnner.do=myauthc
+                /auth/user/changeOwnPassword.do=myauthc
+                /cbas/common/* = myauthc
+                /** = myauthc,myperm
+            </value>
+        </property>
+    </bean>
+
+    <bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+    <bean id="permissionFileter" class="com.dubbo.web.shiro.PermissionFileter" />
+    <bean id="sessionFileter" class="com.dubbo.web.shiro.SessionFileter" />
+
+</beans>

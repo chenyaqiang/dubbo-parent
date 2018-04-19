@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" xsi:schemaLocation="http://www.springframework.org/schema/beans  
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd  
+        ">
+
+	<!--系统资源(系统,菜单,按钮)接口  -->
+    <dubbo:reference id="resourceService" interface="com.dubbo.api.auth.service.ResourceService"  />
+   	<!--角色接口  -->
+    <dubbo:reference id="roleService" interface="com.dubbo.api.auth.service.RoleService"  />
+   	<!--系统用户接口  -->
+    <dubbo:reference id="SysUserService" interface="com.dubbo.api.auth.service.SysUserService"  />
+   	<!--权限管理接口  -->
+    <dubbo:reference id="permissionService" interface="com.dubbo.api.auth.service.PermissionService"  />
+	
+</beans>  

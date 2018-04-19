@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://code.alibabatech.com/schema/dubbo
+       http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+
+    <!-- 提供方应用信息，用于计算依赖关系 -->
+    <dubbo:application name="dubbo-auth"/>
+
+    <dubbo:registry address="${dubbo.zk}" check="false" subscribe="false" register=""/>
+
+    <!-- 用dubbo协议在20100端口暴露服务 -->
+    <dubbo:protocol name="rmi" server="netty" port="${dubbo.protocol.port}" serialization="hessian2" charset="UTF-8"
+                    codec="spring" dispatcher="all" threadpool="fixed" threads="100"/>
+
+    <!--系统资源(系统,菜单,按钮)接口  -->
+    <dubbo:service interface="com.dubbo.api.auth.service.ResourceService" ref="resourceService" protocol="rmi"/>
+    <!--角色接口  -->
+    <dubbo:service interface="com.dubbo.api.auth.service.RoleService" ref="roleService" protocol="rmi"/>
+    <!--系统用户接口  -->
+    <dubbo:service interface="com.dubbo.api.auth.service.SysUserService" ref="sysUserService" protocol="rmi"/>
+    <!--权限管理接口  -->
+    <dubbo:service interface="com.dubbo.api.auth.service.PermissionService" ref="permissionService" protocol="rmi"/>
+
+</beans>
