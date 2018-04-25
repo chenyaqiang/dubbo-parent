@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context 
+            http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+         
+   <bean id="dataSource-job" class="com.alibaba.druid.pool.DruidDataSource" init-method="init" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.job.url}" />
+        <property name="username" value="${jdbc.job.username}" />
+        <property name="password" value="${jdbc.job.password}" />
+        <property name="filters" value="stat" />
+        <property name="maxActive" value="${jdbc.maxPoolSize}" />
+        <property name="initialSize" value="${jdbc.initialPoolSize}" />
+        <property name="maxWait" value="60000" />
+        <property name="minIdle" value="${jdbc.minPoolSize}" />
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+        <!-- sqlserver 数据库这个from dual 要去掉，否则会有对象名'dual'无效错误 -->
+        <property name="validationQuery" value="SELECT 'x' FROM dual" />
+        <property name="testWhileIdle" value="true" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+        <property name="poolPreparedStatements" value="false" />
+        <property name="maxPoolPreparedStatementPerConnectionSize" value="20" />
+    </bean>
+    
+     <bean id="transactionManager-job" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource-job"/>
+    </bean>
+    
+    <bean id="mysqlTemplate" class="org.springframework.jdbc.core.JdbcTemplate" 
+            p:dataSource-ref="dataSource-job" />   
+            
+    <bean id="centerSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource-job" />
+       	<property name="mapperLocations" value="classpath*:mapper/*.xml" />
+    </bean>
+    
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer"> 
+        <property name="sqlSessionFactoryBeanName" value="centerSqlSessionFactory"/>
+        <property name="basePackage" value="com.dubbo.job.mapper" />
+    </bean>
+    
+     <!-- 两个独立事物模板，先加载的为默认，@Transitional("xxxxx")指定用xxxxx事物模板，不指定为默认 -->
+    <tx:annotation-driven transaction-manager="transactionManager-job" proxy-target-class="true"/>
+</beans>

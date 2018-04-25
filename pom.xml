@@ -24,6 +24,9 @@
         <module>dubbo-auth</module>
         <module>dubbo-web</module>
         <module>dubbo-openapi</module>
+        <module>dubbo-job</module>
+        <module>dubbo-rabbitmq</module>
+        <module>dubbo-netty</module>
     </modules>
 
     <dependencyManagement>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx" xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.1.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+           http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-3.1.xsd">
+
+	<!--<context:property-placeholder order="2" location="file:./properties/jdbc.properties" ignore-resource-not-found="true"/> -->
+	<context:property-placeholder location="classpath:properties/application.properties,classpath:properties/quartz.properties,file:./properties/application.properties" ignore-resource-not-found="true" />
+	<context:component-scan base-package="com.dubbo" />
+	<!-- 启用spring @AspectJ支持 -->
+	<aop:aspectj-autoproxy />
+	<!-- 自动对标注 @Autowired 的 Bean 进行注入 -->
+	<context:annotation-config />
+	<!-- dubbo -->
+	<import resource="classpath:dubbo/*.xml" />
+	<import resource="classpath:spring/spring-mybatis.xml" />
+	
+	<!-- quartz持久化存储 -->
+	<bean id="quartzScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="dataSource" ref="dataSource-job" />
+		<property name="applicationContextSchedulerContextKey" value="applicationContext" />
+		<property name="configLocation" value="classpath:properties/quartz.properties" />
+		<!--可选，QuartzScheduler启动时更新己存在的Job，这样就不用每次修改targetObject后删除qrtz_job_details表对应记录了 -->
+		<property name="overwriteExistingJobs" value="true" />
+		<!--设置自动启动 -->
+		<property name="autoStartup" value="true" />
+	</bean>
+	
+	
+</beans>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dubbo.job.mapper.JobMapper">
+
+	<resultMap id="JobResultMap" type="com.dubbo.api.job.dto.JobDto">
+		<result column="id" jdbcType="INTEGER" property="id" />
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+		<result column="input_time" jdbcType="TIMESTAMP" property="inputTime" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="code" jdbcType="VARCHAR" property="code" />
+		<result column="group" jdbcType="VARCHAR" property="group" />
+		<result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+		<result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+		<result column="server" jdbcType="VARCHAR" property="server" />
+		<result column="trigger_type" jdbcType="VARCHAR" property="triggerType" />
+		<result column="cron" jdbcType="VARCHAR" property="cron" />
+		<result column="interval" jdbcType="INTEGER" property="interval" />
+		<result column="repeat_count" jdbcType="INTEGER" property="repeatCount" />
+		<result column="timing_time" jdbcType="TIMESTAMP" property="timingTime" />
+		<result column="ext" jdbcType="VARCHAR" property="ext" />
+	</resultMap>
+
+	<insert id="insert" parameterType="com.dubbo.api.job.dto.JobDto">
+		<selectKey resultType="Long" order="AFTER" keyProperty="id">
+			SELECT LAST_INSERT_ID() AS id
+		</selectKey>
+		INSERT INTO job_detail (input_time, name, code, `group`, start_time, end_time, server, trigger_type, cron, `interval`, repeat_count, ext,timing_time)
+		VALUES
+		(#{inputTime}, #{name}, #{code}, #{group}, #{startTime}, #{endTime}, #{server}, #{triggerType}, #{cron}, #{interval}, #{repeatCount}, #{ext}, #{timingTime})
+	</insert>
+	
+	<update id="update" parameterType="com.dubbo.api.job.dto.JobDto">
+		UPDATE job_detail t
+			SET t.name = #{name},
+			t.start_time = #{startTime},
+			t.end_time = #{endTime},
+			t.server = #{server},
+			t.trigger_type = #{triggerType},
+			t.cron = #{cron},
+			t.`interval` = #{interval},
+			t.repeat_count = #{repeatCount},
+			t.timing_time = #{timingTime},
+			t.ext = #{ext}
+		WHERE
+			t.code = #{code} and t.`group` = #{group}
+	</update>
+	
+	<delete id="delete">
+		delete from job_detail where id = #{id}
+	</delete>
+	
+	<select id="select" resultMap="JobResultMap">
+		SELECT
+		  t.id,
+		  t.`code`,
+		  t.`group`,
+		  t.NAME,
+		  t.start_time,
+		  t.end_time,
+		  t.SERVER,
+		  t.trigger_type,
+		  t.cron,
+		  t.`interval`,
+		  t.repeat_count,
+		  t.ext,
+		  t.timing_time,
+		  t.input_time,
+		  t.update_time
+		FROM
+			job_detail t
+		WHERE
+			 t.id = #{id}
+    </select>
+    
+	<select id="getJobformGroup" resultMap="JobResultMap">
+		SELECT
+		  t.id,
+		  t.`code`,
+		  t.`group`,
+		  t.NAME,
+		  t.start_time,
+		  t.end_time,
+		  t.SERVER,
+		  t.trigger_type,
+		  t.cron,
+		  t.`interval`,
+		  t.repeat_count,
+		  t.timing_time,
+		  t.ext,
+		  t.input_time,
+		  t.update_time
+		FROM
+			job_detail t
+		WHERE
+			t.code = #{code} and t.`group` = #{group}
+    </select>
+</mapper>
